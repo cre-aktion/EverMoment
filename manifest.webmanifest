@@ -1,0 +1,10 @@
+{
+  "name": "EverMoment",
+  "short_name": "EverMoment",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [],
+  "version": "4.0.1-rc.2"
+}
