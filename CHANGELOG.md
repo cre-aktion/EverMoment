@@ -2,6 +2,12 @@
 
 Alle wichtigen Änderungen an EverMoment werden in dieser Datei dokumentiert.
 
+## 4.0.1-rc.3
+
+- iPhone-/iPad-Videofix: native Videosteuerung ist in der Galerie antippbar.
+- `playsinline` und `webkit-playsinline` werden für Galerie- und Vorschauelemente gesetzt.
+- Wird der automatische Videostart von iOS/Safari blockiert, blendet EverMoment native Bedienelemente ein.
+
 ## 4.0.1-rc.2
 
 ### Dokumentation

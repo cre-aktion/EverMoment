@@ -17,7 +17,7 @@ $authenticated = !empty($_SESSION['em_admin']);
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <title>EverMoment Medienverwaltung</title>
-  <link rel="stylesheet" href="assets/media-manager.css?v=4.0.1-rc.2">
+  <link rel="stylesheet" href="assets/media-manager.css?v=4.0.1-rc.3">
 </head>
 <body>
 <?php if (!$authenticated): ?>
@@ -140,7 +140,7 @@ $authenticated = !empty($_SESSION['em_admin']);
   </dialog>
 
   <div id="managerToast" class="manager-toast" role="status" aria-live="polite"></div>
-  <script src="assets/media-manager.js?v=4.0.1-rc.2"></script>
+  <script src="assets/media-manager.js?v=4.0.1-rc.3"></script>
 <?php endif; ?>
 </body>
 </html>

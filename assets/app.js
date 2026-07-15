@@ -104,9 +104,23 @@ function setGalleryControlsHidden(hidden, persist = true) {
   }
 }
 
-function safePlay(el) {
-  const p = el.play();
-  if (p && typeof p.catch === 'function') p.catch(() => {});
+function safePlay(el, onBlocked = null) {
+  let playPromise;
+
+  try {
+    playPromise = el.play();
+  } catch (error) {
+    if (typeof onBlocked === 'function') onBlocked(error);
+    return null;
+  }
+
+  if (playPromise && typeof playPromise.catch === 'function') {
+    playPromise.catch(error => {
+      if (typeof onBlocked === 'function') onBlocked(error);
+    });
+  }
+
+  return playPromise;
 }
 
 function setBlur(url) {
@@ -148,17 +162,24 @@ function buildLayer(item) {
 
   let el;
   if (item.type === 'video') {
+    layer.classList.add('video-layer');
     el = document.createElement('video');
     el.src = item.url;
     el.preload = 'metadata';
     el.controls = state.mode === 'gallery';
     el.playsInline = true;
+    el.setAttribute('playsinline', '');
+    el.setAttribute('webkit-playsinline', '');
+    el.setAttribute('controlslist', 'nodownload');
     el.addEventListener('ended', () => {
       if (state.mode === 'slideshow') {
         go(1, true);
       }
     });
-    el.addEventListener('play', pauseMusicForVideo);
+    el.addEventListener('play', () => {
+      layer.classList.remove('video-play-blocked');
+      pauseMusicForVideo();
+    });
     el.addEventListener('pause', () => {
       if (state.mode === 'gallery') resumeMusicAfterVideo();
     });
@@ -209,7 +230,13 @@ function showIndex(index, autoplay = false) {
       clearTimeout(state.slideTimer);
       if (state.mode === 'slideshow' || autoplay) {
         el.controls = false;
-        safePlay(el);
+        safePlay(el, () => {
+          // iOS/Safari blockiert Videostarts mit Ton häufig, wenn sie nicht
+          // unmittelbar aus einer Benutzeraktion erfolgen. Dann werden die
+          // nativen Bedienelemente eingeblendet, damit ein Antippen genügt.
+          el.controls = true;
+          layer.classList.add('video-play-blocked');
+        });
       }
     }
 
@@ -276,6 +303,8 @@ function createFilmstrip() {
       vid.preload = 'metadata';
       vid.muted = true;
       vid.playsInline = true;
+      vid.setAttribute('playsinline', '');
+      vid.setAttribute('webkit-playsinline', '');
       btn.appendChild(vid);
       const badge = document.createElement('span');
       badge.className = 'thumb-badge';
@@ -1585,7 +1614,7 @@ async function init() {
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=4.0.1-rc.2', { updateViaCache: 'none' })
+    navigator.serviceWorker.register('sw.js?v=4.0.1-rc.3', { updateViaCache: 'none' })
       .then(registration => registration.update())
       .catch(() => {});
   }

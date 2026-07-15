@@ -1,8 +1,6 @@
 # EverMoment
 
 ### Beautiful photo & video presentations.
-> **Aktueller Stand:** EverMoment 4.0.1 Release Candidate 2  
-> Selbst gehostet · Keine Datenbank · Kein Composer · Kein Buildprozess
 
 **EverMoment verwandelt Fotos und Videos in eine moderne, interaktive Erinnerungsgalerie.**
 
@@ -39,93 +37,6 @@ Dank der integrierten Musik- und Diashowfunktion entsteht eine emotionale Präse
 - keine Datenbank erforderlich
 - kein Buildprozess erforderlich
 - selbst gehostet
-
----
-
-## Einblicke in EverMoment
-
-<p align="center">
-  <a href="docs/screenshots/Dia_show_fullscreen.png">
-    <img
-      src="docs/screenshots/Dia_show_fullscreen.png"
-      alt="EverMoment Vollbildansicht mit Diashow und Musik"
-      width="900"
-    >
-  </a>
-</p>
-
-<p align="center">
-  <strong>Erinnerungen in Szene gesetzt</strong><br>
-  Vollbildpräsentation mit Filmstreifen, Zoom, automatischer Diashow,
-  Videos und passender Hintergrundmusik.
-</p>
-
-<br>
-
-<table>
-  <tr>
-    <td width="50%" align="center" valign="top">
-      <a href="docs/screenshots/galery.png">
-        <img
-          src="docs/screenshots/galery.png"
-          alt="EverMoment Galerie"
-          width="430"
-        >
-      </a>
-      <br>
-      <strong>Responsive Galerie</strong>
-      <br>
-      Fotos und Videos übersichtlich an einem zentralen Ort.
-    </td>
-    <td width="50%" align="center" valign="top">
-      <a href="docs/screenshots/media_manager.png">
-        <img
-          src="docs/screenshots/media_manager.png"
-          alt="EverMoment Medienverwaltung"
-          width="430"
-        >
-      </a>
-      <br>
-      <strong>Medienverwaltung</strong>
-      <br>
-      Hochladen, auswählen, sortieren und verwalten – direkt im Browser.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center" valign="top">
-      <a href="docs/screenshots/music_manager.png">
-        <img
-          src="docs/screenshots/music_manager.png"
-          alt="EverMoment Musikverwaltung"
-          width="430"
-        >
-      </a>
-      <br>
-      <strong>Musikverwaltung</strong>
-      <br>
-      Musiktitel, Reihenfolge, ID3-Daten und Cover ohne FTP verwalten.
-    </td>
-    <td width="50%" align="center" valign="top">
-      <a href="docs/screenshots/mobil.jpeg">
-        <img
-          src="docs/screenshots/mobil.jpeg"
-          alt="EverMoment auf dem Smartphone"
-          height="360"
-        >
-      </a>
-      <br>
-      <strong>Für jedes Gerät</strong>
-      <br>
-      Optimiert für Smartphone, Tablet, Desktop-PC und Fernseher.
-    </td>
-  </tr>
-</table>
-
-<p align="center">
-  <a href="docs/screenshots/">
-    Weitere Screenshots ansehen
-  </a>
-</p>
 
 ---
 
@@ -199,14 +110,6 @@ EverMoment/
 │   └── media-manager.js
 ├── config/
 ├── docs/
-│   ├── screenshots/
-│   │   ├── Dia_show_fullscreen.png
-│   │   ├── gallery.png
-│   │   ├── media_manager.png
-│   │   ├── mobil.jpeg
-│   │   ├── music_manager.png
-│   │   ├── qr_code_generator.png
-│   │   └── systemsettings.png
 ├── includes/
 ├── public/
 │   ├── img/
