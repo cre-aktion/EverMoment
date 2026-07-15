@@ -50,6 +50,111 @@ let slideshowTouchActive = false;
 let introTimer = null;
 let isExitingSlideshow = false;
 
+// iOS/Safari: one persistent video element is reused for the complete
+// slideshow. The element is primed by the user's click on "Diashow" so
+// later videos can start without another tap.
+const slideshowVideoParking = document.createElement('div');
+slideshowVideoParking.hidden = true;
+slideshowVideoParking.setAttribute('aria-hidden', 'true');
+document.body.appendChild(slideshowVideoParking);
+
+const slideshowVideo = document.createElement('video');
+slideshowVideo.preload = 'auto';
+slideshowVideo.playsInline = true;
+slideshowVideo.setAttribute('playsinline', '');
+slideshowVideo.setAttribute('webkit-playsinline', '');
+slideshowVideo.setAttribute('controlslist', 'nodownload');
+slideshowVideoParking.appendChild(slideshowVideo);
+let slideshowVideoPrimed = false;
+let slideshowVideoPriming = null;
+
+function normalizedMediaUrl(url) {
+  try {
+    const parsed = new URL(url, window.location.href);
+    parsed.hash = '';
+    return parsed.href;
+  } catch (_) {
+    return String(url || '').split('#')[0];
+  }
+}
+
+function firstSlideshowVideo() {
+  if (!state.media.length) return null;
+  for (let offset = 0; offset < state.media.length; offset += 1) {
+    const item = state.media[(state.index + offset) % state.media.length];
+    if (item?.type === 'video') return item;
+  }
+  return null;
+}
+
+function parkSlideshowVideo() {
+  if (slideshowVideo.parentNode !== slideshowVideoParking) {
+    slideshowVideoParking.appendChild(slideshowVideo);
+  }
+}
+
+function primeSlideshowVideo() {
+  const item = firstSlideshowVideo();
+  if (!item || slideshowVideoPrimed) return Promise.resolve();
+  if (slideshowVideoPriming) return slideshowVideoPriming;
+
+  const targetUrl = videoPreviewUrl(item.url);
+  if (normalizedMediaUrl(slideshowVideo.currentSrc || slideshowVideo.src) !== normalizedMediaUrl(targetUrl)) {
+    slideshowVideo.src = targetUrl;
+    slideshowVideo.load();
+  }
+
+  // The priming playback must be started directly from the slideshow button
+  // click. It stays inaudible, but is deliberately not muted so iOS also
+  // authorizes later videos with sound.
+  slideshowVideo.muted = false;
+  slideshowVideo.volume = 0;
+
+  const playPromise = safePlay(slideshowVideo);
+  if (!playPromise || typeof playPromise.then !== 'function') {
+    slideshowVideoPriming = null;
+    return Promise.resolve();
+  }
+
+  slideshowVideoPriming = playPromise
+    .then(() => {
+      slideshowVideo.pause();
+      try { slideshowVideo.currentTime = 0; } catch (_) {}
+      slideshowVideo.volume = 1;
+      slideshowVideoPrimed = true;
+      parkSlideshowVideo();
+    })
+    .catch(() => {
+      // A blocked priming attempt is harmless. The regular fallback overlay
+      // remains available when the first slideshow video is reached.
+    })
+    .finally(() => {
+      slideshowVideoPriming = null;
+    });
+
+  return slideshowVideoPriming;
+}
+
+/**
+ * Reads a persisted UI setting without allowing blocked or unavailable
+ * Web Storage to abort the complete EverMoment initialization.
+ */
+function readStoredSetting(primaryKey, legacyKey, fallbackValue) {
+  try {
+    const primaryValue = localStorage.getItem(primaryKey);
+    if (primaryValue !== null) return primaryValue;
+
+    if (legacyKey && legacyKey !== primaryKey) {
+      const legacyValue = localStorage.getItem(legacyKey);
+      if (legacyValue !== null) return legacyValue;
+    }
+  } catch (error) {
+    console.warn('EverMoment: Gespeicherte Einstellung konnte nicht gelesen werden.', error);
+  }
+
+  return fallbackValue;
+}
+
 const state = {
   media: [],
   music: [],
@@ -123,6 +228,37 @@ function safePlay(el, onBlocked = null) {
   return playPromise;
 }
 
+function videoPreviewUrl(url) {
+  if (!url) return url;
+  return `${url}#t=0.001`;
+}
+
+function addVideoStartOverlay(layer, video) {
+  if (layer.querySelector('.video-start-overlay')) return;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'video-start-overlay';
+  button.setAttribute('aria-label', 'Video starten');
+  button.innerHTML = '<span class="video-start-icon">▶</span><span>Video starten</span>';
+
+  button.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    pauseMusicForVideo();
+    video.controls = true;
+    layer.classList.remove('video-play-blocked');
+
+    safePlay(video, () => {
+      resumeMusicAfterVideo();
+      layer.classList.add('video-play-blocked');
+    });
+  });
+
+  layer.appendChild(button);
+}
+
 function setBlur(url) {
   if (!state.blur || !url) {
     blurLayer.classList.add('off');
@@ -163,26 +299,30 @@ function buildLayer(item) {
   let el;
   if (item.type === 'video') {
     layer.classList.add('video-layer');
-    el = document.createElement('video');
-    el.src = item.url;
-    el.preload = 'metadata';
+    el = state.mode === 'slideshow' ? slideshowVideo : document.createElement('video');
+    const targetVideoUrl = videoPreviewUrl(item.url);
+    if (normalizedMediaUrl(el.currentSrc || el.src) !== normalizedMediaUrl(targetVideoUrl)) {
+      el.src = targetVideoUrl;
+      el.load();
+    }
+    el.preload = 'auto';
     el.controls = state.mode === 'gallery';
     el.playsInline = true;
     el.setAttribute('playsinline', '');
     el.setAttribute('webkit-playsinline', '');
     el.setAttribute('controlslist', 'nodownload');
-    el.addEventListener('ended', () => {
+    el.onended = () => {
       if (state.mode === 'slideshow') {
         go(1, true);
       }
-    });
-    el.addEventListener('play', () => {
+    };
+    el.onplaying = () => {
       layer.classList.remove('video-play-blocked');
-      pauseMusicForVideo();
-    });
-    el.addEventListener('pause', () => {
-      if (state.mode === 'gallery') resumeMusicAfterVideo();
-    });
+      layer.querySelector('.video-start-overlay')?.remove();
+    };
+    el.onpause = () => {
+      if (state.mode === 'gallery' || el.ended) resumeMusicAfterVideo();
+    };
   } else {
     el = document.createElement('img');
     el.src = item.url;
@@ -209,7 +349,10 @@ function showIndex(index, autoplay = false) {
     if (state.activeLayer) {
       state.activeLayer.classList.remove('active');
       const old = state.activeLayer;
-      setTimeout(() => old.remove(), state.fadeMs + 80);
+      setTimeout(() => {
+        if (old.contains(slideshowVideo)) parkSlideshowVideo();
+        old.remove();
+      }, state.fadeMs + 80);
     }
 
     state.activeLayer = layer;
@@ -229,13 +372,19 @@ function showIndex(index, autoplay = false) {
       setBlur('');
       clearTimeout(state.slideTimer);
       if (state.mode === 'slideshow' || autoplay) {
+        // iOS kann nicht zuverlässig zwei hörbare Media-Elemente gleichzeitig
+        // umschalten. Deshalb wird die Musik vor dem Videostart pausiert.
+        pauseMusicForVideo();
         el.controls = false;
+        el.muted = false;
+        el.volume = 1;
         safePlay(el, () => {
-          // iOS/Safari blockiert Videostarts mit Ton häufig, wenn sie nicht
-          // unmittelbar aus einer Benutzeraktion erfolgen. Dann werden die
-          // nativen Bedienelemente eingeblendet, damit ein Antippen genügt.
+          // Wird der automatische Start von iOS blockiert, läuft die Musik
+          // weiter und ein echter, direkt antippbarer Startknopf erscheint.
+          resumeMusicAfterVideo();
           el.controls = true;
           layer.classList.add('video-play-blocked');
+          addVideoStartOverlay(layer, el);
         });
       }
     }
@@ -299,8 +448,8 @@ function createFilmstrip() {
       btn.appendChild(img);
     } else {
       const vid = document.createElement('video');
-      vid.src = item.url;
-      vid.preload = 'metadata';
+      vid.src = videoPreviewUrl(item.url);
+      vid.preload = 'auto';
       vid.muted = true;
       vid.playsInline = true;
       vid.setAttribute('playsinline', '');
@@ -331,12 +480,18 @@ async function enterSlideshow() {
   pauseAllVideos(true);
   resetMusicToStart();
 
+  // Start the iOS video authorization directly inside the user's click,
+  // then wait until the inaudible priming playback has stopped. Starting the
+  // music before this promise settles would let iOS interrupt it after one tone.
+  const videoPrimingPromise = primeSlideshowVideo();
+
   app.classList.remove('gallery-mode');
   app.classList.add('slideshow-mode', 'ui-awake');
   slideshowControls.classList.add('visible');
   slideshowControls.setAttribute('aria-hidden', 'false');
   slideshowEmergencyExitBtn?.classList.add('visible');
 
+  await videoPrimingPromise;
   startMusic(true);
 
   try {
@@ -371,6 +526,7 @@ function exitSlideshow() {
   weddingIntro.classList.remove('show');
   hideNowPlaying();
   pauseAllVideos(true);
+  parkSlideshowVideo();
   resetMusicToStart();
 
   app.classList.remove('slideshow-mode', 'ui-awake');

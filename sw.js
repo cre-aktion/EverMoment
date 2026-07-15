@@ -1,9 +1,9 @@
-const CACHE = 'evermoment-4.0.1-rc.3';
+const CACHE = 'evermoment-4.0.1-rc.7';
 const CORE = [
   './',
   'index.php',
-  'assets/app.css?v=4.0.1-rc.3',
-  'assets/app.js?v=4.0.1-rc.3',
+  'assets/app.css?v=4.0.1-rc.7',
+  'assets/app.js?v=4.0.1-rc.7',
   'manifest.webmanifest'
 ];
 

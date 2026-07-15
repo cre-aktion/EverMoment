@@ -1,8 +1,20 @@
 # Changelog
 
-Alle wichtigen Änderungen an EverMoment werden in dieser Datei dokumentiert.
 
-## 4.0.1-rc.3
+## 4.0.1 RC7
+
+- iPhone-Diashow: Musik startet erst nach Abschluss der unsichtbaren Video-Freigabe.
+- Verhindert, dass iOS die Hintergrundmusik direkt nach dem ersten Ton wieder stoppt.
+- Automatischer Videostart in der Diashow aus RC6 bleibt erhalten.
+
+## 4.0.1 RC6
+
+- iPhone/iPad: Diashow-Videos starten ohne zusätzlichen Klick.
+- Ein persistenter Videoplayer wird beim Start der Diashow freigegeben und während der Präsentation wiederverwendet.
+- Der manuelle Startknopf bleibt nur als technische Rückfallebene erhalten.
+- Musik pausiert weiterhin vor dem Video und wird danach fortgesetzt.
+
+## 4.0.1-rc.6
 
 - iPhone-/iPad-Videofix: native Videosteuerung ist in der Galerie antippbar.
 - `playsinline` und `webkit-playsinline` werden für Galerie- und Vorschauelemente gesetzt.

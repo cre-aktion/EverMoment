@@ -1,4 +1,4 @@
-EverMoment 4.0.1 RC3
+EverMoment 4.0.1 RC7
 
 Die vollständige Dokumentation befindet sich in:
 
