@@ -65,9 +65,9 @@ Dank der integrierten Musik- und Diashowfunktion entsteht eine emotionale Präse
 <table>
   <tr>
     <td width="50%" align="center" valign="top">
-      <a href="docs/screenshots/gallery.png">
+      <a href="docs/screenshots/galery.png">
         <img
-          src="docs/screenshots/gallery.png"
+          src="docs/screenshots/galery.png"
           alt="EverMoment Galerie"
           width="430"
         >
