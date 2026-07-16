@@ -158,6 +158,6 @@ Kommerzielle Nutzung soll nicht ohne ausdrückliche Genehmigung des Urhebers erl
 
 ## Status
 
-**EverMoment 4.0.1 Release Candidate 2**
+**EverMoment 4.0.1 Release Candidate 9**
 
-Dieser Stand ist für abschließende Installationstests und die Vorbereitung der ersten öffentlichen Veröffentlichung vorgesehen.
+Dieser Stand dient den abschließenden Stabilitäts- und Praxistests vor der ersten finalen Veröffentlichung.
