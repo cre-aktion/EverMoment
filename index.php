@@ -8,10 +8,10 @@ declare(strict_types=1);
   <meta name="theme-color" content="#111111">
   <title>EverMoment</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="assets/app.css?v=4.0.1-rc.7">
+  <link rel="stylesheet" href="assets/app.css?v=4.0.1-rc.9">
 </head>
 <body>
-<div id="app" class="app gallery-mode" data-version="4.0.1-rc.7">
+<div id="app" class="app gallery-mode" data-version="4.0.1-rc.9">
   <div id="blurLayer" class="blur-layer" aria-hidden="true"></div>
 
   <header id="topbar" class="topbar ui-layer">
@@ -333,6 +333,6 @@ declare(strict_types=1);
   <audio id="musicPlayerA" preload="auto"></audio>
   <audio id="musicPlayerB" preload="auto"></audio>
 </div>
-<script src="assets/app.js?v=4.0.1-rc.7"></script>
+<script src="assets/app.js?v=4.0.1-rc.9"></script>
 </body>
 </html>

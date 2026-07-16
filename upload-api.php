@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/media-revision.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 function fail(string $m,int $c=400): never { http_response_code($c); echo json_encode(['ok'=>false,'error'=>$m],JSON_UNESCAPED_UNICODE); exit; }
@@ -24,6 +25,31 @@ try {
   while(file_exists($dest)){ $next++; $width=max(3,strlen((string)$next)); $name=str_pad((string)$next,$width,'0',STR_PAD_LEFT).'.'.$ext; $dest=$targetDir.'/'.$name; }
   if(!move_uploaded_file($f['tmp_name'],$dest)) fail('Datei konnte nicht gespeichert werden.',500);
   @chmod($dest,0664);
-  $revision=emBumpMediaRevision();
-} finally { flock($lock,LOCK_UN); fclose($lock); }
-echo json_encode(['ok'=>true,'name'=>$name,'revision'=>$revision??emMediaRevision()],JSON_UNESCAPED_UNICODE);
+
+  // Der eigentliche Upload gilt als erfolgreich, sobald die Datei gespeichert ist.
+  // Ein Fehler beim Aktualisieren der Cache-Revision darf diesen Erfolg nicht
+  // nachträglich in einen HTTP-500-Fehler verwandeln.
+  $revision=(string)max(1,time());
+  $revisionWarning=null;
+  try {
+    $revision=emBumpMediaRevision();
+  } catch (Throwable $revisionError) {
+    $revisionWarning='Medienrevision konnte nicht aktualisiert werden.';
+    error_log('EverMoment upload revision warning: '.$revisionError->getMessage());
+    try {
+      $revision=emMediaRevision();
+    } catch (Throwable $fallbackError) {
+      error_log('EverMoment upload revision fallback warning: '.$fallbackError->getMessage());
+    }
+  }
+} catch (Throwable $error) {
+  error_log('EverMoment upload error: '.$error->getMessage());
+  fail('Interner Serverfehler beim Upload.',500);
+} finally {
+  flock($lock,LOCK_UN);
+  fclose($lock);
+}
+
+$response=['ok'=>true,'name'=>$name,'revision'=>$revision];
+if($revisionWarning!==null) $response['warning']=$revisionWarning;
+echo json_encode($response,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);

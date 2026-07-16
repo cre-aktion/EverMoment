@@ -980,7 +980,12 @@ function syncMusicCrossfadeSettingsUi() {
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {cache:'no-store', ...options});
   const text = await response.text(); let data={};
-  try { data=JSON.parse(text); } catch (_) { throw new Error('Ungültige Serverantwort.'); }
+  try {
+    data=JSON.parse(text);
+  } catch (_) {
+    const detail=text.trim().replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,180);
+    throw new Error(`Serverantwort ungültig (HTTP ${response.status})${detail ? `: ${detail}` : ''}`);
+  }
   if (!response.ok || data.ok === false) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
 }

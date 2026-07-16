@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.1 RC9
+
+- Upload bleibt erfolgreich, auch wenn die Medienrevision nicht aktualisiert werden kann.
+- Fehler beim Aktualisieren der Cache-Revision werden protokolliert, statt einen leeren HTTP-500-Fehler auszulösen.
+- Serverseitige Uploadfehler liefern jetzt eine gültige JSON-Fehlermeldung.
+
+
+## 4.0.1 RC8
+
+- Upload-Hotfix: fehlende Einbindung der Medienrevision ergänzt
+- Erfolgreich gespeicherte Uploads liefern wieder eine gültige JSON-Antwort
+- Upload-Fehler zeigen künftig HTTP-Status und Serverdetails statt nur „Ungültige Serverantwort“
 
 ## 4.0.1 RC7
 
